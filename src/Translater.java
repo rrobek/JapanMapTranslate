@@ -1,4 +1,17 @@
-
+/*
+ * JapanMapTranslate
+ * Copyright (c) Florian Fischer, 2016 (florianfischer@gmx.de)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
 
 import java.io.IOException;
 import java.io.Writer;
@@ -16,7 +29,7 @@ import com.atilika.kuromoji.ipadic.Tokenizer;
 import com.atilika.kuromoji.unidic.Tokenizer;*/
 /*import com.atilika.kuromoji.jumandic.Token;
 import com.atilika.kuromoji.jumandic.Tokenizer;*/
-import com.kawao.kakasi.Kakasi;
+import kanaconv.Kakasi;
 
  
 public class Translater extends DefaultHandler 
