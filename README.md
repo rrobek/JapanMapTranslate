@@ -1,7 +1,7 @@
 JapanMapTranslate Tool
 ===============================
 Created by Florian Fischer (florianfischer@gmx.de)  
-Based on Kakasi, the Kanji-Kana Simple Inverter http://kakasi.namazu.org/  
+Based on Kuromoji, an open source Japanese morphological analyzer http://www.atilika.org/ and Kakasi, the Kanji-Kana Simple Inverter http://kakasi.namazu.org/  
 Licensed under the GNU General Public License (GPL), see LICENSE.
 
 How to use: 
