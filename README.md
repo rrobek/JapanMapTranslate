@@ -10,7 +10,7 @@ The following step-by-step guide shows how to create and use your own maps.
 
 Credits
 ------------------------------
-Created by Florian Fischer (florianfischer@gmx.de)  
+Created by Florian Fischer (florianfischer at gmx dot-net)  
 Based on Kuromoji, an open source Japanese morphological analyzer http://www.atilika.org/ and Kakasi, the Kanji-Kana Simple Inverter http://kakasi.namazu.org/  
 Licensed under the GNU General Public License (GPL), see LICENSE.
 
