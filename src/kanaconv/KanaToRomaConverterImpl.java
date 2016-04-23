@@ -37,20 +37,20 @@ class KanaToRomaConverterImpl {
 
     private static class Table {
 
-        final Map table = new HashMap();
+        final Map<Character, List<Entry>> table = new HashMap<Character, List<Entry>>();
 
         void add(String kana, String romaji) {
             Character key = new Character(kana.charAt(0));
             Entry newEntry = new Entry(kana.substring(1), romaji);
 
-            List list = (List)table.get(key);
+            List<Entry> list = (List<Entry>)table.get(key);
             if (list == null) {
-                list = new LinkedList();
+                list = new LinkedList<Entry>();
                 list.add(newEntry);
                 table.put(key, list);
             } else {
                 int newLength = newEntry.getKanaLength();
-                ListIterator iterator = list.listIterator();
+                ListIterator<Entry> iterator = list.listIterator();
                 while (iterator.hasNext()) {
                     Entry entry = (Entry)iterator.next();
                     if (newLength >= entry.getKanaLength()) {
@@ -67,13 +67,13 @@ class KanaToRomaConverterImpl {
             if (ch < 0) {
                 return null;
             }
-            List list = (List)table.get(new Character((char)ch));
+            List<?> list = (List<?>)table.get(new Character((char)ch));
             if (list == null) {
                 return null;
             }
             String rest = null;
             int restLength = 0;
-            Iterator iterator = list.iterator();
+            Iterator<?> iterator = list.iterator();
             while (iterator.hasNext()) {
                 Entry entry = (Entry)iterator.next();
                 int length = entry.getKanaLength();
