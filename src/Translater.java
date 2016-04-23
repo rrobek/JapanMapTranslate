@@ -13,7 +13,11 @@
  * GNU General Public License for more details.
  */
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +29,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import com.atilika.kuromoji.ipadic.Token;
 import com.atilika.kuromoji.ipadic.Tokenizer;
+/* Tests with the other dictionaries did not show improved results. */ 
 /*import com.atilika.kuromoji.unidic.Token;
 import com.atilika.kuromoji.unidic.Tokenizer;*/
 /*import com.atilika.kuromoji.jumandic.Token;
@@ -41,15 +46,18 @@ public class Translater extends DefaultHandler
     // Further parameters
     private int verbose = 0;
     private boolean both = false; 
+    private boolean advanced = false; 
 
-    // Three instances of the Kakasi service
-    // are required to transliterate all three
-    // japanese scripts. 
-    //private Kakasi trKanji = null;
+    // Two instances of the Kakasi service
+    // are required to transliterate both kana scripts.
 	private Kakasi trHiragana = null;
 	private Kakasi trKatakana = null;
+	// Use the Kumoroji tokenizer to split words and to read kanji.
 	private Tokenizer tokKanji = null; 
 	
+	// Stat file stuff
+	private String statFile = null;
+	private Map<String, Integer> stats; 
     
     public Translater(Writer out)
     {
@@ -76,8 +84,19 @@ public class Translater extends DefaultHandler
     	both = b; 
     }
     
+    public void setAdvanced(boolean b)
+    {
+    	advanced = b;
+    }
+    
+    public void enableStats(String statFile)
+    {
+    	this.statFile = statFile;
+    	stats = new HashMap<String, Integer>();
+    }
+    
     // Output statistics: 
-    private int numSuccess = 0, numPartial = 0, numFailed = 0; 
+    private int numSuccess = 0, numPartial = 0, numFailed = 0, numEnglish = 0; 
     
 	public int getNumSuccess() {
 		return numSuccess;
@@ -90,12 +109,17 @@ public class Translater extends DefaultHandler
 	public int getNumFailed() {
 		return numFailed;
 	}
+	
+	public int getNumEnglish() {
+		return numEnglish; 
+	}
 
     
     // Information about the current map element
-    private String jaName = null;
-    private String enName = null; 
-    
+    private String jaName = null; // both "name" or "name:ja"
+    private String enName = null; // both "name:en" or "name:ja_rm"
+    private String enNameOnly = null; // only "name:en"
+    private String deName = null; // only "name:de"
     
     public boolean isMapElem(String elemName)
     {
@@ -157,6 +181,24 @@ public class Translater extends DefaultHandler
         } catch (IOException e) {
             throw new SAXException("I/O error", e);
         }
+        
+        // Stats handling: 
+        if(statFile != null) {
+        	try {
+        		Writer wr = new OutputStreamWriter(new FileOutputStream(statFile), "UTF-8");
+        		for (String item : stats.keySet()) {
+					wr.write(item);
+					wr.write('\t');
+					wr.write(stats.get(item).toString());
+					wr.write('\n');
+				}
+        		wr.close();
+        	}
+        	catch(IOException e) {
+        		throw new SAXException("Stat writing error", e);
+        	}
+        	
+        }
     }
 
     public void startElement(String namespaceURI, String sName, // simple name
@@ -173,15 +215,21 @@ public class Translater extends DefaultHandler
         if(isMapElem(eName)) {
         	// New map elem starts. Now we have to look for its names... 
         	jaName = null;
-        	enName = null; 
+        	enName = null;
+        	enNameOnly = null;
+        	deName = null; 
         }
         else if(eName.equals("tag"))
         {
         	String key = attrs.getValue("k");
         	if(key.equals("name:en") || (key.equals("name:ja_rm") && enName == null))
         		enName = attrs.getValue("v");
+        	else if(key.equals("name:de"))
+        		deName = attrs.getValue("v");
         	else if(key.equals("name") || key.equals("name:ja"))
         		jaName = attrs.getValue("v");
+        	if(key.equals("name:en"))
+        		enNameOnly = attrs.getValue("v");
         }
 
         emit("<" + eName);
@@ -214,11 +262,12 @@ public class Translater extends DefaultHandler
         }
         
         if(isMapElem(eName)) {
-        	// Todo: Generate an english name and write it here, if none exists
-        	if(enName == null && jaName != null) {
+        	// The transliterated name. May be used by both english and advanced outputs. 
+        	// Do the transliteration here once, if necessary. 
+        	String trName = enName; 
+        	if((enName == null) && jaName != null) {
         		// First check: are there kanji in the jaName? 
         		if(hasAsianChar(jaName)) {
-        			String trName = null;
 					try {
 						// Transliterate all writing systems
 						trName = transliterate(jaName);
@@ -226,9 +275,16 @@ public class Translater extends DefaultHandler
 						// Check result
 						boolean fail = (trName.equals(jaName));
 						boolean partial = !fail && hasAsianChar(trName);
-						if(fail) numFailed++;
-						else if(partial) numPartial++;
-						else numSuccess++;
+						if(fail) {
+							numFailed++;
+							trName = null; 
+						}
+						else if(partial) { 
+							numPartial++;
+						}
+						else { 
+							numSuccess++;
+						}
 						
 						if(verbose > 0) {
 							String result =      "success: ";
@@ -237,19 +293,59 @@ public class Translater extends DefaultHandler
 							if(fail || partial || verbose > 1)
 								System.out.println(result + "generated english name: " + trName + " from japanese name: " + jaName);
 						}
-						// Output the transliterated name
-	            		if(trName != null && !fail) {
-	            			String finalName = trName;
-	            			if(both) finalName = finalName + " (" + jaName + ")";
-	            			String out = "<tag k=\"name:en\" v=\"" + StringEscapeUtils.escapeXml(finalName)
-	            					+ "\" />\n";
-	            			emit(out);
-	            		}
 						
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+        		}
+        	}
+        	
+        	if(trName != null) {
+	        	// Write the english name
+	        	if(enNameOnly == null && jaName != null) {
+					// Output the transliterated name
+	        		if(trName != null) {
+	        			String finalName = trName;
+	        			// TODO: additional translation of the finalName should be done here. For now, just do stats.
+	        			if(statFile != null) {
+		        			String[] words = finalName.trim().split("\\s+");
+		        			for(String word : words) {
+		        				String tok = word.toLowerCase();
+		        				Integer val = stats.get(tok);
+		        				int v = 0; 
+		        				if(val != null) v = val.intValue();
+		        				stats.put(tok, v+1);
+		        			}
+	        			}
+	        			// Actual Output
+	        			if(both) finalName = finalName + " (" + jaName + ")";
+	        			String out = "<tag k=\"name:en\" v=\"" + StringEscapeUtils.escapeXml(finalName)
+	        					+ "\" />\n";
+	        			emit(out);
+	        		}
+	        	}
+        	}
+        	
+        	// Write the "advanced" name also, if enabled
+        	if(advanced && deName == null && jaName != null) {
+        		String finalName = null; 
+        		// Null check: can we use the english name instead? 
+        		if(enName != null) {
+        			// Output the english name
+        			finalName = jaName; if(!enName.equals(jaName)) finalName = finalName + " (" + enName + ")";
+        			numEnglish++;
+        		}
+        		// No, there is none. Use the trName instead, if exists.
+        		if(trName != null) {
+        			finalName = jaName; if(!trName.equals(jaName)) finalName = finalName + " (" + trName + ")";
+        		}
+        		if(finalName != null)
+        		{
+	        		// Finally output the advanced name.
+	    			String out = "<tag k=\"name:de\" v=\"" + StringEscapeUtils.escapeXml(finalName)
+	    					+ "\" />\n";
+	    			emit(out);
         		}
         	}
         }
