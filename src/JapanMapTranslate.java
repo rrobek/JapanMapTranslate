@@ -91,7 +91,7 @@ public class JapanMapTranslate
 			FileOutputStream fos = new FileOutputStream(outfile);
 			OutputStreamWriter out = new OutputStreamWriter(fos, "UTF8");
 			// Use an instance of ourselves as the SAX event handler
-			Translater tr = new Translater(out);
+			MapTranslater tr = new MapTranslater(out);
 			tr.setVerbose(verbose);
 			tr.setBoth(both);
 			tr.setAdvanced(advanced);
