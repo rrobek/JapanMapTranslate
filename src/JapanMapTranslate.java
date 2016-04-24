@@ -24,6 +24,8 @@ import javax.xml.parsers.SAXParserFactory;
 
 public class JapanMapTranslate 
 {
+	public static final double VERSION = 1.2;  
+	
 	private static int verbose = 0; 
 	private static boolean both = false; 
 	private static boolean advanced = false; 
@@ -73,6 +75,10 @@ public class JapanMapTranslate
 	
 	private static void doHelp()
 	{
+		System.out.println("JapanMapTranslate " + VERSION);
+		System.out.println("Copyright (c) Florian Fischer, 2016 (florianfischer@gmx.de).");
+		System.out.println("Licensed under the GNU GPL. ");
+		System.out.println();
 		System.out.println("Usage: java JapanMapTranslate [OPTIONS] [FILES...]");
 		System.out.println("Available OPTIONS: ");
 		System.out.println("  -both       Include original Japanese name in English name");

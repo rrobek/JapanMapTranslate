@@ -1,3 +1,18 @@
+/*
+ * JapanMapTranslate
+ * Copyright (c) Florian Fischer, 2016 (florianfischer@gmx.de)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -6,13 +21,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-/*
- * Manages and applys a word list for simple translation.
- * The word list must be a tab-separated file with three columns
- * sourceword	translation	usage
+/**
+ * Manages and applies a word list for simple translation.
+ * The word list must be a tab-separated file with three columns:<br>
+ * 		<code>sourceword	translation	usage</code><br>
  * The line is only used if the "usage" field is not empty.
  */
-
 public class Wordlist {
 	
 	static final String FIELD_SEP = "\t";
@@ -22,6 +36,7 @@ public class Wordlist {
 
 	private Map<String, String> wordList = null;
 	
+	/** Reads a word list from a file. */
 	public Wordlist(String file)
 	{
 		wordList = new HashMap<String, String>();
@@ -48,6 +63,7 @@ public class Wordlist {
 		}
 	}
 	
+	/** Attempts to translate a text using the word list. */
 	public String translate(String text)
 	{
 		StringBuilder res = new StringBuilder();
