@@ -44,6 +44,8 @@ public class MapTranslater extends DefaultHandler
 
     // Actual transliteration
     private Transliterator trl = null;
+    // Wordlist
+    private Wordlist wordList = null; 
 
 	// Stat file stuff
 	private String statFile = null;
@@ -74,6 +76,11 @@ public class MapTranslater extends DefaultHandler
     {
     	this.statFile = statFile;
     	stats = new HashMap<String, Integer>();
+    }
+    
+    public void enableWordList(String wlFile)
+    {
+    	wordList = new Wordlist(wlFile);
     }
     
     // Output statistics: 
@@ -209,12 +216,20 @@ public class MapTranslater extends DefaultHandler
         	// The transliterated name. May be used by both english and advanced outputs. 
         	// Do the transliteration here once, if necessary. 
         	String trName = enName; 
+        	// If desired, the name with wordlist translation applied. 
+        	String woName = trName;
+        	
         	if((enName == null) && jaName != null) {
         		// First check: are there kanji in the jaName? 
         		if(Transliterator.hasAsianChar(jaName)) {
 					try {
 						// Transliterate all writing systems
 						trName = transliterate(jaName);
+						woName = trName;
+	        			// additional translation using word list, if desired
+	        			if(wordList != null) {
+	        				woName = wordList.translate(woName);
+	        			}						
 						
 						// Check result
 						boolean fail = (trName.equals(jaName));
@@ -222,6 +237,7 @@ public class MapTranslater extends DefaultHandler
 						if(fail) {
 							numFailed++;
 							trName = null; 
+							woName = null;
 						}
 						else if(partial) { 
 							numPartial++;
@@ -235,7 +251,7 @@ public class MapTranslater extends DefaultHandler
 							if(partial) result = "partial: ";
 							if(fail) result =    "FAILURE: ";
 							if(fail || partial || verbose > 1)
-								System.out.println(result + "generated english name: " + trName + " from japanese name: " + jaName);
+								System.out.println(result + "generated english name: " + woName + " from japanese name: " + jaName);
 						}
 						
 					} catch (IOException e) {
@@ -245,15 +261,15 @@ public class MapTranslater extends DefaultHandler
         		}
         	}
         	
-        	if(trName != null) {
+        	if(woName != null) {
 	        	// Write the english name
 	        	if(enNameOnly == null && jaName != null) {
 					// Output the transliterated name
-	        		if(trName != null) {
-	        			String finalName = trName;
+	        		if(woName != null) {
+	        			String finalName = woName;
 	        			// TODO: additional translation of the finalName should be done here. For now, just do stats.
 	        			if(statFile != null) {
-		        			String[] words = finalName.trim().split("\\s+");
+		        			String[] words = trName.trim().split("\\s+");
 		        			for(String word : words) {
 		        				String tok = word.toLowerCase();
 		        				Integer val = stats.get(tok);
@@ -262,6 +278,7 @@ public class MapTranslater extends DefaultHandler
 		        				stats.put(tok, v+1);
 		        			}
 	        			}
+
 	        			// Actual Output
 	        			if(both) finalName = finalName + " (" + jaName + ")";
 	        			String out = "<tag k=\"name:en\" v=\"" + StringEscapeUtils.escapeXml(finalName)

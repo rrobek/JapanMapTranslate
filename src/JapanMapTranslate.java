@@ -28,6 +28,7 @@ public class JapanMapTranslate
 	private static boolean both = false; 
 	private static boolean advanced = false; 
 	private static String stat = null; 
+	private static String wordList = null; 
 
 	/**
 	 * @param args
@@ -35,12 +36,19 @@ public class JapanMapTranslate
 	public static void main(String[] args) 
 	{
 		
-		boolean assignStat = false;  
+		boolean assignStat = false; 
+		boolean assignWordlist = false; 
+		
 		for(String arg : args)
 		{
 			if(assignStat) {
 				stat = arg; 
 				assignStat = false;
+				continue;
+			}
+			if(assignWordlist) {
+				wordList = arg; 
+				assignWordlist = false;
 				continue;
 			}
 			if(arg.equals("-v") || arg.equals("-verbose") || arg.equals("--verbose"))
@@ -53,6 +61,8 @@ public class JapanMapTranslate
 				advanced = true; 
 			else if(arg.equals("-stat") || arg.equals("--stat"))
 				assignStat = true; 
+			else if(arg.equals("-word") || arg.equals("--word"))
+				assignWordlist = true; 
 			else if(arg.equals("-h") || arg.equals("-help") || arg.equals("--help"))
 				doHelp();
 			else
@@ -70,6 +80,7 @@ public class JapanMapTranslate
 		System.out.println("  -v          Verbose output.");
 		System.out.println("  -vv         Even more verbose output.");
 		System.out.println("  -stat FILE  Write word occurrency statistics to FILE.");
+		System.out.println("  -word FILE  Use a translation wordlist from FILE.");
 		System.out.println("  -h          Print help message.");
 		System.out.println("FILES are map data files in the OSM XML format.");
 		System.out.println("Each file is loaded, Japanese place names are transliterated to English");
@@ -96,6 +107,7 @@ public class JapanMapTranslate
 			tr.setBoth(both);
 			tr.setAdvanced(advanced);
 			if(stat != null) tr.enableStats(stat);
+			if(wordList != null) tr.enableWordList(wordList);
 			
 		
 		    // Parse the input
