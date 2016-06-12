@@ -38,6 +38,10 @@ public class Transliterator {
 	// Use the Kumoroji tokenizer to split words and to read kanji.
 	private Tokenizer tokKanji = null; 
 	
+	Tokenizer getTokenizer() {
+		return tokKanji;
+	}
+	
 	public Transliterator()
 	{
     	tokKanji = new Tokenizer(); 
@@ -115,7 +119,7 @@ public class Transliterator {
     	return prenormTable;
     }
     
-    private String prenormalize(String str) {
+    String prenormalize(String str) {
     	Map<Character, Character> tbl = getPrenormTable();
     	char[] chars = str.toCharArray();
     	for(int i = 0; i < chars.length; i++) {
@@ -168,7 +172,7 @@ public class Transliterator {
 			}*/
 			else {
 				String surf = t.getSurface();
-				if(sb.length() > 0)
+				if(sb.length() > 0 && surf.length() > 0 && !Character.isWhitespace(surf.charAt(0)))
 					sb.append(' ');
 				sb.append(surf);
 			}

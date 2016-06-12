@@ -1,0 +1,12 @@
+/.gitignore
+/JapanMapTranslate.bat
+/JapanMapTranslate.class
+/JapanMapTranslate.sh
+/MapTranslater.class
+/TranslationList.class
+/Transliterator.class
+/Wordlist.class
+/kanaconv/
+/lib/
+/translation.csv
+/wordlist.csv

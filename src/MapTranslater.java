@@ -42,6 +42,8 @@ public class MapTranslater extends DefaultHandler
     private boolean both = false; 
     private boolean advanced = false; 
 
+    // Translationlist
+    private TranslationList translationList = null;
     // Actual transliteration
     private Transliterator trl = null;
     // Wordlist
@@ -60,6 +62,8 @@ public class MapTranslater extends DefaultHandler
     public void setVerbose(int v)
     {
     	verbose = v;
+    	if(translationList != null)
+    		translationList.setVerbose(v);
     }
     
     public void setBoth(boolean b)
@@ -81,6 +85,12 @@ public class MapTranslater extends DefaultHandler
     public void enableWordList(String wlFile)
     {
     	wordList = new Wordlist(wlFile);
+    }
+    
+    public void enableTranslationList(String trFile)
+    {
+    	translationList = new TranslationList(trFile);
+    	translationList.setVerbose(verbose);
     }
     
     // Output statistics: 
@@ -331,6 +341,10 @@ public class MapTranslater extends DefaultHandler
     //===========================================================
 	private String transliterate(String s) throws IOException
 	{
+		if(translationList != null) {
+			s = trl.prenormalize(s);
+			s = translationList.translate(trl.getTokenizer(), s);
+		}
 		return trl.transliterate(s);
 	}
 	

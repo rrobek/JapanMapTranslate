@@ -31,6 +31,7 @@ public class JapanMapTranslate
 	private static boolean advanced = false; 
 	private static String stat = null; 
 	private static String wordList = null; 
+	private static String transList = null; 
 
 	/**
 	 * @param args
@@ -40,6 +41,7 @@ public class JapanMapTranslate
 		
 		boolean assignStat = false; 
 		boolean assignWordlist = false; 
+		boolean assignTranslist = false; 
 		
 		for(String arg : args)
 		{
@@ -51,6 +53,11 @@ public class JapanMapTranslate
 			if(assignWordlist) {
 				wordList = arg; 
 				assignWordlist = false;
+				continue;
+			}
+			if(assignTranslist) {
+				transList = arg; 
+				assignTranslist = false;
 				continue;
 			}
 			if(arg.equals("-v") || arg.equals("-verbose") || arg.equals("--verbose"))
@@ -65,6 +72,8 @@ public class JapanMapTranslate
 				assignStat = true; 
 			else if(arg.equals("-word") || arg.equals("--word"))
 				assignWordlist = true; 
+			else if(arg.equals("-trans") || arg.equals("--trans"))
+				assignTranslist = true; 
 			else if(arg.equals("-h") || arg.equals("-help") || arg.equals("--help"))
 				doHelp();
 			else
@@ -86,7 +95,8 @@ public class JapanMapTranslate
 		System.out.println("  -v          Verbose output.");
 		System.out.println("  -vv         Even more verbose output.");
 		System.out.println("  -stat FILE  Write word occurrency statistics to FILE.");
-		System.out.println("  -word FILE  Use a translation wordlist from FILE.");
+		System.out.println("  -trans FILE Use a translation list (kanji -> english) from FILE.");
+		System.out.println("  -word FILE  Use a translation wordlist (romaji -> english) from FILE.");
 		System.out.println("  -h          Print help message.");
 		System.out.println("FILES are map data files in the OSM XML format.");
 		System.out.println("Each file is loaded, Japanese place names are transliterated to English");
@@ -114,6 +124,7 @@ public class JapanMapTranslate
 			tr.setAdvanced(advanced);
 			if(stat != null) tr.enableStats(stat);
 			if(wordList != null) tr.enableWordList(wordList);
+			if(transList != null) tr.enableTranslationList(transList);
 			
 		
 		    // Parse the input
